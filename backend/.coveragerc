@@ -1,0 +1,60 @@
+[run]
+# Coverage configuration for Colombian Electronic Invoicing System
+
+# Source code to analyze
+source = app
+
+# Files to exclude from coverage
+omit = 
+    */tests/*
+    */test_*
+    */__pycache__/*
+    */venv/*
+    */env/*
+    */.venv/*
+    */migrations/*
+    */scripts/*
+    app/main.py
+    */conftest.py
+
+# Branch coverage
+branch = True
+
+# Parallel mode for async tests
+parallel = True
+
+[report]
+# Show missing lines
+show_missing = True
+
+# Skip covered files
+skip_covered = False
+
+# Precision for percentages
+precision = 2
+
+# Exclude lines from coverage
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    def __str__
+    raise AssertionError
+    raise NotImplementedError
+    if __name__ == .__main__.:
+    if TYPE_CHECKING:
+    class .*\(Protocol\):
+    @(abc\.)?abstractmethod
+
+# Fail if coverage is below this percentage
+fail_under = 80
+
+[html]
+# HTML report directory
+directory = htmlcov
+
+# Custom title
+title = Colombian Electronic Invoicing System - Coverage Report
+
+[xml]
+# XML output file
+output = coverage.xml

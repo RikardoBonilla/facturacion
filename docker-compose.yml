@@ -18,6 +18,22 @@ services:
       - facturacion_network
     restart: unless-stopped
 
+  # Base de datos de pruebas
+  db_test:
+    image: postgres:15
+    container_name: facturacion_db_test
+    environment:
+      POSTGRES_DB: facturacion_test
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+    ports:
+      - "5433:5432"
+    tmpfs:
+      - /var/lib/postgresql/data  # Use tmpfs for faster tests
+    networks:
+      - facturacion_network
+    restart: "no"  # Don't restart test database automatically
+
   # Backend Python con FastAPI
   backend:
     build: 
