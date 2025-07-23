@@ -10,7 +10,8 @@ from sqlalchemy import select, update, delete
 from sqlalchemy.orm import selectinload
 
 from app.core.database import get_db
-from app.models import Factura, FacturaDetalle, FacturaImpuesto, Producto, Cliente, Empresa
+from app.core.auth import get_current_active_user
+from app.models import Factura, FacturaDetalle, FacturaImpuesto, Producto, Cliente, Empresa, Usuario
 from app.schemas.factura import (
     FacturaCreate, FacturaUpdate, Factura as FacturaSchema, FacturaList
 )
@@ -121,10 +122,12 @@ async def calculate_factura_totals(factura_id: int, db: AsyncSession):
 @router.post("/", response_model=FacturaSchema, status_code=status.HTTP_201_CREATED)
 async def create_factura(
     factura_data: FacturaCreate,
-    empresa_id: int,
+    current_user: Usuario = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db)
 ):
     """Crear nueva factura"""
+    
+    empresa_id = current_user.empresa_id
     
     # Verificar que el cliente existe
     stmt_cliente = select(Cliente).where(
@@ -213,14 +216,16 @@ async def create_factura(
 
 @router.get("/", response_model=List[FacturaList])
 async def list_facturas(
-    empresa_id: int,
     skip: int = 0,
     limit: int = 100,
     activo: bool = True,
     estado_dian: str = None,
+    current_user: Usuario = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """Listar facturas de una empresa"""
+    """Listar facturas de mi empresa"""
+    
+    empresa_id = current_user.empresa_id
     
     stmt = (
         select(Factura, Cliente.razon_social, Cliente.primer_nombre, Cliente.primer_apellido)

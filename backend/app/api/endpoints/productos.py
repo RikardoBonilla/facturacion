@@ -8,7 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, delete
 
 from app.core.database import get_db
-from app.models import Producto
+from app.core.auth import get_current_active_user
+from app.models import Producto, Usuario
 from app.schemas.producto import ProductoCreate, ProductoUpdate, Producto as ProductoSchema, ProductoList
 
 router = APIRouter()
@@ -17,10 +18,12 @@ router = APIRouter()
 @router.post("/", response_model=ProductoSchema, status_code=status.HTTP_201_CREATED)
 async def create_producto(
     producto_data: ProductoCreate,
-    empresa_id: int,
+    current_user: Usuario = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db)
 ):
     """Crear nuevo producto"""
+    
+    empresa_id = current_user.empresa_id
     
     # Verificar que no exista otro producto con el mismo código en la empresa
     stmt = select(Producto).where(
@@ -48,14 +51,16 @@ async def create_producto(
 
 @router.get("/", response_model=List[ProductoList])
 async def list_productos(
-    empresa_id: int,
     skip: int = 0,
     limit: int = 100,
     activo: bool = True,
     tipo: str = None,
+    current_user: Usuario = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """Listar productos de una empresa"""
+    """Listar productos de mi empresa"""
+    
+    empresa_id = current_user.empresa_id
     
     stmt = select(Producto).where(
         Producto.empresa_id == empresa_id, 

@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.database import get_db
+from app.core.auth import get_current_user
 from app.schemas.auth import Token, UserLogin
 from app.services.auth_service import AuthService
 
@@ -51,25 +52,27 @@ async def login(
     }
 
 
-@router.post("/refresh")
-async def refresh_token(
-    current_user: dict = Depends(oauth2_scheme),
-    db: AsyncSession = Depends(get_db)
+@router.get("/me", response_model=dict)
+async def get_current_user_info(
+    current_user = Depends(get_current_user)
 ):
     """
-    Endpoint para renovar token de acceso
+    Obtener información del usuario actual
     """
-    # Implementar lógica de renovación de token
-    pass
+    return {
+        "id": current_user.id,
+        "email": current_user.email,
+        "nombre": f"{current_user.nombre} {current_user.apellido}",
+        "empresa_id": current_user.empresa_id,
+        "activo": current_user.activo,
+        "rol_id": current_user.rol_id
+    }
 
 
 @router.post("/logout")
-async def logout(
-    current_user: dict = Depends(oauth2_scheme),
-    db: AsyncSession = Depends(get_db)
-):
+async def logout():
     """
     Endpoint para cerrar sesión
+    En JWT stateless, el logout se maneja del lado del cliente eliminando el token
     """
-    # Implementar lógica de logout (invalidar token)
     return {"message": "Sesión cerrada exitosamente"}
