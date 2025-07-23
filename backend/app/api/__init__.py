@@ -4,7 +4,7 @@ API Router configuration
 
 from fastapi import APIRouter
 
-from app.api.endpoints import empresas, usuarios, auth, clientes, productos, facturas
+from app.api.endpoints import auth, empresas, clientes, productos, facturas, usuarios
 
 api_router = APIRouter()
 
