@@ -13,6 +13,7 @@ sys.path.insert(0, str(backend_dir))
 
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy import select
 from app.core.config import settings
 from app.models import *
 from app.services.auth_service import AuthService
@@ -30,18 +31,30 @@ async def create_initial_data():
         
         print("🌱 Creating initial data...")
         
-        # Create roles
-        admin_role = Rol(
-            nombre="ADMINISTRADOR",
-            descripcion="Administrador del sistema con todos los permisos"
+        # Get or create roles
+        admin_role_result = await session.execute(
+            select(Rol).where(Rol.nombre == "ADMINISTRADOR")
         )
-        session.add(admin_role)
+        admin_role = admin_role_result.scalar_one_or_none()
         
-        user_role = Rol(
-            nombre="USUARIO",
-            descripcion="Usuario estándar con permisos básicos"
+        if not admin_role:
+            admin_role = Rol(
+                nombre="ADMINISTRADOR",
+                descripcion="Administrador del sistema con todos los permisos"
+            )
+            session.add(admin_role)
+        
+        user_role_result = await session.execute(
+            select(Rol).where(Rol.nombre == "USUARIO")
         )
-        session.add(user_role)
+        user_role = user_role_result.scalar_one_or_none()
+        
+        if not user_role:
+            user_role = Rol(
+                nombre="USUARIO",
+                descripcion="Usuario estándar con permisos básicos"
+            )
+            session.add(user_role)
         
         await session.flush()  # Get IDs
         
@@ -66,12 +79,18 @@ async def create_initial_data():
         ]
         
         for modulo, accion, descripcion in permissions:
-            permiso = Permiso(
-                modulo=modulo,
-                accion=accion,
-                descripcion=descripcion
+            # Check if permission already exists
+            existing_permission_result = await session.execute(
+                select(Permiso).where(Permiso.modulo == modulo, Permiso.accion == accion)
             )
-            session.add(permiso)
+            existing_permission = existing_permission_result.scalar_one_or_none()
+            if not existing_permission:
+                permiso = Permiso(
+                    modulo=modulo,
+                    accion=accion,
+                    descripcion=descripcion
+                )
+                session.add(permiso)
         
         await session.flush()
         
@@ -162,32 +181,149 @@ async def create_initial_data():
         )
         session.add(test_cliente)
         
-        # Create test products
+        # Create more test clients
+        test_clientes = [
+            {
+                "tipo_persona": "NATURAL",
+                "tipo_documento": "CC",
+                "numero_documento": "98765432",
+                "nombres": "Juan Carlos",
+                "apellidos": "Pérez García",
+                "email": "juan.perez@email.com",
+                "telefono": "3012345678",
+                "direccion": "Calle 15 # 10-20",
+                "ciudad": "Bogotá",
+                "departamento": "Cundinamarca",
+                "regimen_fiscal": "SIMPLIFICADO"
+            },
+            {
+                "tipo_persona": "JURIDICA",
+                "tipo_documento": "NIT",
+                "numero_documento": "800123456",
+                "dv": "9",
+                "razon_social": "Comercializadora ABC S.A.S.",
+                "nombre_comercial": "Comercializadora ABC",
+                "email": "facturacion@comercializadoraabc.com",
+                "telefono": "6012345678",
+                "direccion": "Carrera 7 # 45-67",
+                "ciudad": "Medellín",
+                "departamento": "Antioquia",
+                "regimen_fiscal": "COMUN",
+                "responsabilidades_fiscales": ["05", "09"]
+            },
+            {
+                "tipo_persona": "NATURAL",
+                "tipo_documento": "CC",
+                "numero_documento": "45678901",
+                "nombres": "María Elena",
+                "apellidos": "Rodríguez López",
+                "email": "maria.rodriguez@email.com",
+                "telefono": "3098765432",
+                "direccion": "Calle 22 # 30-45",
+                "ciudad": "Cali",
+                "departamento": "Valle del Cauca",
+                "regimen_fiscal": "SIMPLIFICADO"
+            },
+            {
+                "tipo_persona": "JURIDICA",
+                "tipo_documento": "NIT",
+                "numero_documento": "900987654",
+                "dv": "3",
+                "razon_social": "Distribuidora XYZ Ltda",
+                "nombre_comercial": "Distribuidora XYZ",
+                "email": "contabilidad@distribuidoraxyz.com",
+                "telefono": "6019876543",
+                "direccion": "Avenida 68 # 12-34",
+                "ciudad": "Barranquilla",
+                "departamento": "Atlántico",
+                "regimen_fiscal": "COMUN",
+                "responsabilidades_fiscales": ["05", "09", "48"]
+            }
+        ]
+        
+        for cliente_data in test_clientes:
+            cliente = Cliente(
+                empresa_id=test_empresa.id,
+                **cliente_data
+            )
+            session.add(cliente)
+        
+        # Create diverse test products
         test_products = [
             {
-                "codigo": "PROD001",
-                "nombre": "Servicio de Consultoría",
-                "descripcion": "Servicio profesional de consultoría",
-                "codigo_unspsc": "81161500",
+                "codigo_interno": "SERV001",
+                "nombre": "Consultoría en Sistemas",
+                "descripcion": "Servicio profesional de consultoría en sistemas de información",
+                "codigo_clasificacion": "81161500",
                 "tipo": "SERVICIO",
-                "precio_unitario": 100000,
-                "unidad_medida": "UNI",
-                "incluye_iva": True,
+                "precio": 150000,
+                "unidad_medida": "HOR",
+                "aplica_iva": True,
                 "porcentaje_iva": 19.00
             },
             {
-                "codigo": "PROD002", 
-                "nombre": "Producto Físico",
-                "descripcion": "Producto físico de ejemplo",
-                "codigo_unspsc": "43211500",
+                "codigo_interno": "PROD001", 
+                "nombre": "Computador Portátil",
+                "descripcion": "Computador portátil Intel Core i5, 8GB RAM, 256GB SSD",
+                "codigo_clasificacion": "43211508",
                 "tipo": "PRODUCTO",
-                "precio_unitario": 50000,
-                "unidad_medida": "UNI",
-                "incluye_iva": True,
+                "precio": 2500000,
+                "costo": 2000000,
+                "unidad_medida": "UND",
+                "aplica_iva": True,
                 "porcentaje_iva": 19.00,
-                "maneja_inventario": True,
-                "stock_actual": 100,
-                "stock_minimo": 10
+                "stock_actual": 50,
+                "stock_minimo": 5
+            },
+            {
+                "codigo_interno": "PROD002",
+                "nombre": "Mouse Inalámbrico",
+                "descripcion": "Mouse óptico inalámbrico con receptor USB",
+                "codigo_clasificacion": "43211714",
+                "tipo": "PRODUCTO",
+                "precio": 45000,
+                "costo": 25000,
+                "unidad_medida": "UND",
+                "aplica_iva": True,
+                "porcentaje_iva": 19.00,
+                "stock_actual": 200,
+                "stock_minimo": 20
+            },
+            {
+                "codigo_interno": "SERV002",
+                "nombre": "Soporte Técnico",
+                "descripcion": "Servicio de soporte técnico especializado",
+                "codigo_clasificacion": "81112200",
+                "tipo": "SERVICIO",
+                "precio": 80000,
+                "unidad_medida": "HOR",
+                "aplica_iva": True,
+                "porcentaje_iva": 19.00
+            },
+            {
+                "codigo_interno": "PROD003",
+                "nombre": "Teclado Mecánico",
+                "descripcion": "Teclado mecánico gaming retroiluminado",
+                "codigo_clasificacion": "43211710",
+                "tipo": "PRODUCTO",
+                "precio": 320000,
+                "costo": 200000,
+                "unidad_medida": "UND",
+                "aplica_iva": True,
+                "porcentaje_iva": 19.00,
+                "stock_actual": 30,
+                "stock_minimo": 3
+            },
+            {
+                "codigo_interno": "SERV003",
+                "nombre": "Capacitación Empresarial",
+                "descripcion": "Capacitación en herramientas empresariales",
+                "codigo_clasificacion": "92111600",
+                "tipo": "SERVICIO",
+                "precio": 500000,
+                "unidad_medida": "DIA",
+                "aplica_iva": True,
+                "porcentaje_iva": 19.00
             }
         ]
         

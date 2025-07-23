@@ -40,7 +40,7 @@ class FacturaDetalle(FacturaDetalleBase):
 
 class FacturaImpuestoBase(BaseModel):
     """Schema base para impuesto de factura"""
-    tipo_impuesto: str = Field(..., regex="^(IVA|INC|ICA)$", description="Tipo de impuesto")
+    tipo_impuesto: str = Field(..., pattern="^(IVA|INC|ICA)$", description="Tipo de impuesto")
     porcentaje: Decimal = Field(..., ge=0, le=100, description="Porcentaje del impuesto")
     base_gravable: Decimal = Field(..., ge=0, description="Base gravable")
     valor_impuesto: Decimal = Field(..., ge=0, description="Valor del impuesto")
@@ -76,7 +76,7 @@ class FacturaUpdate(BaseModel):
     fecha_vencimiento: Optional[date] = None
     observaciones: Optional[str] = None
     notas: Optional[str] = None
-    estado_dian: Optional[str] = Field(None, regex="^(BORRADOR|EMITIDA|ACEPTADA|RECHAZADA|ANULADA)$")
+    estado_dian: Optional[str] = Field(None, pattern="^(BORRADOR|EMITIDA|ACEPTADA|RECHAZADA|ANULADA)$")
 
 
 class Factura(FacturaBase):

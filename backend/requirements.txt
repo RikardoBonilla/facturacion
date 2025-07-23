@@ -23,8 +23,7 @@ httpx==0.25.2
 # CORS
 fastapi-cors==0.0.6
 
-# Documentación API
-redoc==2.0.0
+# Documentación API (FastAPI includes built-in docs)
 
 # Logging
 loguru==0.7.2
@@ -41,7 +40,4 @@ httpx==0.25.2
 factory-boy==3.3.0
 faker==19.12.1
 
-# Formateo de código (desarrollo)
-black==23.11.0
-isort==5.12.0
-flake8==6.1.0
+# Note: Development tools moved to requirements-dev.txt

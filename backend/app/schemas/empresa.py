@@ -19,12 +19,12 @@ class EmpresaBase(BaseModel):
     email: EmailStr = Field(..., description="Email de la empresa")
     
     # Datos DIAN
-    tipo_contribuyente: str = Field(..., regex="^(PERSONA_NATURAL|PERSONA_JURIDICA)$", description="Tipo de contribuyente")
-    regimen_fiscal: str = Field(..., regex="^(SIMPLIFICADO|COMUN)$", description="Régimen fiscal")
+    tipo_contribuyente: str = Field(..., pattern="^(PERSONA_NATURAL|PERSONA_JURIDICA)$", description="Tipo de contribuyente")
+    regimen_fiscal: str = Field(..., pattern="^(SIMPLIFICADO|COMUN)$", description="Régimen fiscal")
     responsabilidades_fiscales: Optional[List[str]] = Field(None, description="Códigos de responsabilidades fiscales DIAN")
     
     # Configuración facturación electrónica
-    ambiente_dian: str = Field(default="PRUEBAS", regex="^(PRUEBAS|PRODUCCION)$", description="Ambiente DIAN")
+    ambiente_dian: str = Field(default="PRUEBAS", pattern="^(PRUEBAS|PRODUCCION)$", description="Ambiente DIAN")
     prefijo_factura: Optional[str] = Field(None, max_length=10, description="Prefijo para facturas")
     resolucion_dian: Optional[str] = Field(None, max_length=50, description="Número de resolución DIAN")
     fecha_resolucion: Optional[date] = Field(None, description="Fecha de resolución DIAN")
@@ -46,10 +46,10 @@ class EmpresaUpdate(BaseModel):
     departamento: Optional[str] = Field(None, min_length=2, max_length=100)
     telefono: Optional[str] = Field(None, max_length=20)
     email: Optional[EmailStr] = None
-    tipo_contribuyente: Optional[str] = Field(None, regex="^(PERSONA_NATURAL|PERSONA_JURIDICA)$")
-    regimen_fiscal: Optional[str] = Field(None, regex="^(SIMPLIFICADO|COMUN)$")
+    tipo_contribuyente: Optional[str] = Field(None, pattern="^(PERSONA_NATURAL|PERSONA_JURIDICA)$")
+    regimen_fiscal: Optional[str] = Field(None, pattern="^(SIMPLIFICADO|COMUN)$")
     responsabilidades_fiscales: Optional[List[str]] = None
-    ambiente_dian: Optional[str] = Field(None, regex="^(PRUEBAS|PRODUCCION)$")
+    ambiente_dian: Optional[str] = Field(None, pattern="^(PRUEBAS|PRODUCCION)$")
     prefijo_factura: Optional[str] = Field(None, max_length=10)
     resolucion_dian: Optional[str] = Field(None, max_length=50)
     fecha_resolucion: Optional[date] = None

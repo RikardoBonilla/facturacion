@@ -7,6 +7,7 @@ from .empresa import Empresa
 from .cliente import Cliente
 from .producto import Producto
 from .factura import Factura, FacturaDetalle, FacturaImpuesto
+from .rol import Rol, Permiso, Sesion
 
 __all__ = [
     "Usuario",
@@ -15,5 +16,8 @@ __all__ = [
     "Producto",
     "Factura",
     "FacturaDetalle",
-    "FacturaImpuesto"
+    "FacturaImpuesto",
+    "Rol",
+    "Permiso",
+    "Sesion"
 ]

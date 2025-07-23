@@ -14,7 +14,7 @@ class ProductoBase(BaseModel):
     nombre: str = Field(..., min_length=2, max_length=200, description="Nombre del producto")
     descripcion: Optional[str] = Field(None, description="Descripción del producto")
     codigo_unspsc: Optional[str] = Field(None, max_length=20, description="Código UNSPSC")
-    tipo: str = Field(..., regex="^(PRODUCTO|SERVICIO)$", description="Tipo de producto/servicio")
+    tipo: str = Field(..., pattern="^(PRODUCTO|SERVICIO)$", description="Tipo de producto/servicio")
     
     # Precios
     precio_unitario: Decimal = Field(..., ge=0, description="Precio unitario")
@@ -48,7 +48,7 @@ class ProductoUpdate(BaseModel):
     nombre: Optional[str] = Field(None, min_length=2, max_length=200)
     descripcion: Optional[str] = None
     codigo_unspsc: Optional[str] = Field(None, max_length=20)
-    tipo: Optional[str] = Field(None, regex="^(PRODUCTO|SERVICIO)$")
+    tipo: Optional[str] = Field(None, pattern="^(PRODUCTO|SERVICIO)$")
     precio_unitario: Optional[Decimal] = Field(None, ge=0)
     precio_compra: Optional[Decimal] = Field(None, ge=0)
     unidad_medida: Optional[str] = Field(None, max_length=20)

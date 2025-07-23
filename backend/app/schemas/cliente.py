@@ -9,8 +9,8 @@ from pydantic import BaseModel, Field, EmailStr
 
 class ClienteBase(BaseModel):
     """Schema base para Cliente"""
-    tipo_persona: str = Field(..., regex="^(NATURAL|JURIDICA)$", description="Tipo de persona")
-    tipo_documento: str = Field(..., regex="^(NIT|CC|CE|PASAPORTE)$", description="Tipo de documento")
+    tipo_persona: str = Field(..., pattern="^(NATURAL|JURIDICA)$", description="Tipo de persona")
+    tipo_documento: str = Field(..., pattern="^(NIT|CC|CE|PASAPORTE)$", description="Tipo de documento")
     numero_documento: str = Field(..., min_length=6, max_length=20, description="Número de documento")
     
     # Datos personales/empresariales
@@ -33,7 +33,7 @@ class ClienteBase(BaseModel):
     codigo_postal: Optional[str] = Field(None, max_length=10, description="Código postal")
     
     # Datos fiscales
-    regimen_fiscal: Optional[str] = Field(None, regex="^(SIMPLIFICADO|COMUN)$", description="Régimen fiscal")
+    regimen_fiscal: Optional[str] = Field(None, pattern="^(SIMPLIFICADO|COMUN)$", description="Régimen fiscal")
     responsabilidad_tributaria: Optional[str] = Field(None, max_length=10, description="Código responsabilidad tributaria DIAN")
 
 
@@ -44,8 +44,8 @@ class ClienteCreate(ClienteBase):
 
 class ClienteUpdate(BaseModel):
     """Schema para actualizar cliente"""
-    tipo_persona: Optional[str] = Field(None, regex="^(NATURAL|JURIDICA)$")
-    tipo_documento: Optional[str] = Field(None, regex="^(NIT|CC|CE|PASAPORTE)$")
+    tipo_persona: Optional[str] = Field(None, pattern="^(NATURAL|JURIDICA)$")
+    tipo_documento: Optional[str] = Field(None, pattern="^(NIT|CC|CE|PASAPORTE)$")
     numero_documento: Optional[str] = Field(None, min_length=6, max_length=20)
     razon_social: Optional[str] = Field(None, max_length=200)
     nombre_comercial: Optional[str] = Field(None, max_length=200)
@@ -60,7 +60,7 @@ class ClienteUpdate(BaseModel):
     ciudad: Optional[str] = Field(None, min_length=2, max_length=100)
     departamento: Optional[str] = Field(None, min_length=2, max_length=100)
     codigo_postal: Optional[str] = Field(None, max_length=10)
-    regimen_fiscal: Optional[str] = Field(None, regex="^(SIMPLIFICADO|COMUN)$")
+    regimen_fiscal: Optional[str] = Field(None, pattern="^(SIMPLIFICADO|COMUN)$")
     responsabilidad_tributaria: Optional[str] = Field(None, max_length=10)
 
 
