@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  # Base de datos PostgreSQL
+  db:
+    image: postgres:15
+    container_name: facturacion_db
+    environment:
+      POSTGRES_DB: facturacion
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./facturacion.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    networks:
+      - facturacion_network
+    restart: unless-stopped
+
+  # Backend Python con FastAPI
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: facturacion_backend
+    environment:
+      DATABASE_URL: postgresql://admin:admin123@db:5432/facturacion
+      SECRET_KEY: tu-clave-secreta-super-segura-cambiar-en-produccion
+      DEBUG: "True"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - db
+    networks:
+      - facturacion_network
+    restart: unless-stopped
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # Frontend Ionic/Angular (opcional para desarrollo)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: facturacion_frontend
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - facturacion_network
+    restart: unless-stopped
+    command: npm run start
+
+volumes:
+  postgres_data:
+
+networks:
+  facturacion_network:
+    driver: bridge
